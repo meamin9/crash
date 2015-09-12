@@ -15,12 +15,18 @@ end
 
 function utils.define_property(class_name, property_name, default)
    local method_name = string.capitalize(property_name)
-   class_name['get'..method_name] = function(self)return self[property_name] or default end
+   class_name['get'..method_name] = function(self)return self[property_name] end
    class_name['set'..method_name] = function(self, value) self[property_name] = value end
+   if default ~= nil then
+      class_name[property_name] = default
+   end
 end
 
 function utils.define_class_property(class_name, property_name, default)
    local method_name = string.capitalize(property_name)
-   class_name['get'..method_name] = function()return class_name[property_name] or default end
+   class_name['get'..method_name] = function()return class_name[property_name] end
    class_name['set'..method_name] = function(value) class_name[property_name] = value end
+   if default ~= nil then
+      class_name[property_name] = default
+   end
 end

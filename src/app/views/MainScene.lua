@@ -30,7 +30,8 @@ function MainScene:onCreate()
                print('touched click')
                self:getApp():enterScene('PlayScene')
             end
-      end)
+              end)
+   utils.DebugPanel.new():addTo(self)
 end
 
 return MainScene

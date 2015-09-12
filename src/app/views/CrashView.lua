@@ -15,6 +15,85 @@ function CrashView:onCreate()
       :addTo(self)
    self:draw_board_grids()
    self:create_tile_view()
+   self:installTouchLayer()
+end
+
+function CrashView:installTouchLayer()
+   cc.Layer:create():addTo(self)
+      :onTouch(handler(self, self.onTouchEvent))
+   self.selected_tile_ = nil
+end
+
+function CrashView:onTouchEvent(event)
+   print(event.name)
+   if event.name == 'began' then
+      return self:onTouchBegan(event)
+   elseif event.name == 'move' then
+      return self:onTouchMove(event)
+   elseif event.name == 'ended' then
+      --
+   else
+   end
+end
+
+function CrashView:onTouchBegan(event)
+   local p = self.board:convertToNodeSpace(cc.p(event.x, event.y))
+   local col = math.floor(p.x/aside)+1
+   local row = math.floor(p.y/aside)+1
+   local tile = self.model:getTile(row, col)
+   print('touch ', row, col, tile, self.selected_tile_)
+   print(p.x,p.y, event.x, event.y)
+
+   if not tile then
+      if self.selected_tile_ then
+         self.selected_tile_:onSelectedCancel()
+         self.selecred_tile_ = nil
+      end
+      return false
+   end
+   if not self.selected_tile_ then
+      self.selected_tile_ = tile
+      tile:onSelected()
+      return true
+   end
+   if tile:can_exchange_with_tile(self.selected_tile_) == false then
+      self.selected_tile_:onSelectedCancel()
+      tile:onSelected()
+      self.selected_tile_ = tile
+      return true
+   end
+   self.selected_tile_:onSelectedCancel()
+   local tile_a = self.selected_tile_
+   self.selected_tile_ = nil
+   print('ex',tile:getColIdx(),tile_a:getColIdx())
+   self.model:exchangeTwoTiles(tile_a, tile)
+   return false
+end
+
+function CrashView:onTouchMove(event)
+   if not self.selected_tile_ then
+      return
+   end
+   local p = self.board:convertToNodeSpace(cc.p(event.x, event.y))
+   local col = math.floor(p.x/aside)+1
+   local row = math.floor(p.y/aside)+1
+   local tile = self.model:getTile(row, col)
+   if not tile then
+      return
+   end
+   --you hua
+   if tile:can_exchange_with_tile(self.selected_tile_) == false then
+      return
+   end
+   local tile_a = self.selected_tile_
+   self.selected_tile_ = nil
+   tile_a:onSelectedCancel()
+   self.model:exchangeTwoTiles(tile_a, tile)
+end
+
+function CrashView:getTileView(point)
+   local p = self.board:convertToNodeSpace(point)
+   return math.floor(p.x/aside), math.floor(p.y/aside)
 end
 
 function CrashView:create_tile_view()
@@ -24,7 +103,7 @@ function CrashView:create_tile_view()
       for j = 1, col do
          local tile = self.model:getTile(i, j)
          local sprite = TileSprite.new(tile)
-         sprite:setPosition(aside/2 + (i-1)*aside, aside/2 + (j-1)*aside)
+         sprite:setPosition(aside/2 + (j-1)*aside, aside/2 + (i-1)*aside)
          self.board:addChild(sprite)
       end
    end
