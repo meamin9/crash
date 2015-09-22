@@ -18,9 +18,9 @@ function MainScene:onCreate()
    print('crash begin')
    cc.LayerColor:create(cc.c4b(199,32,199,128)):addTo(self)
    cc.Label:createWithSystemFont('touch anywhere to start', 'Arial', 72):addTo(self)
-      :align(display.CEBTER, display.center)
-      :move(display.cx, display.height/3)
-   cc.Layer:create():addTo(self)
+      :align(display.CENTER, display.cx, display.height/3)
+   cc.Layer:create()
+      --:addTo(self)
       :onTouch(function(event)
             print('touch', dump(event))
             if event.name == 'began' then
@@ -31,7 +31,8 @@ function MainScene:onCreate()
                self:getApp():enterScene('PlayScene')
             end
               end)
-   utils.DebugPanel.new():addTo(self)
+   --utils.DebugPanel.new():addTo(self,10):move(100,100)
+   utils.showDebugPanelSwitcher()
 end
 
 return MainScene

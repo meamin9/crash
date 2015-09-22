@@ -1,5 +1,6 @@
 /*
 !config.json
 !.gitignore
-!/src
 !/res
+!/src
+src/TAGS
