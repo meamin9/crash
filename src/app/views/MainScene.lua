@@ -32,7 +32,7 @@ function MainScene:onCreate()
             end
               end)
    --utils.DebugPanel.new():addTo(self,10):move(100,100)
-   utils.showDebugPanelSwitcher()
+   utils.showDebugPanelSwitcher(self)
 end
 
 return MainScene

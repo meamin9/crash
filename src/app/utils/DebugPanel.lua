@@ -133,16 +133,19 @@ end
 
 utils = utils or {}
 utils.DebugPanel = DebugPanel
-function utils.showDebugPanelSwitcher()
-   local scene = cc.Director:getInstance():getRunningScene()
+function utils.showDebugPanelSwitcher(scene)
+   scene = scene or cc.Director:getInstance():getRunningScene()
    --local clippingNode = cc.ClippingNode:create()
    --clippingNode:setContentSize(cc.size(100, 100))
    local drawNode = cc.DrawNode:create()
    drawNode:setContentSize(cc.size(100, 100))
    drawNode:drawSolidCircle(cc.p(50, 50), 40, math.pi*2, 60, 1, 1, cc.c4f(0,0,0,255))
-   drawNode:registerScriptTapHandler(function() print('click') end)
    drawNode:setPosition(100,100)
    scene:addChild(drawNode)
+   local listener = cc.EventListenerTouchOneByOne:create()
+   listener:registerScriptHandler(function()print('touch began')end, cc.Handler.EVENT_TOUCH_BEGAN)
+   local eventDispatcher = cc.Director:getInstance():getEventDispatcher()
+   eventDispatcher:addEventListenerWithSceneGraphPriority(listener, drawNode)
 end
 
 return DebugPanel
