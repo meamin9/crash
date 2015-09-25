@@ -30,3 +30,41 @@ function utils.define_class_property(class_name, property_name, default)
       class_name[property_name] = default
    end
 end
+
+function utils.touchEventInNodeContent(touch, event)
+  local target = event:getCurrentTarget()
+  local pos = target:convertToNodeSpace(touch:getLocation())
+  local size = target:getContentSize()
+  if 0 <= pos.x and pos.x <= size.width and
+  0 <= pos.y and pos.y <= size.height then
+     return true
+  end
+  return false
+end
+
+function utils.registerNodeScriptClickHanlder(handler, node)
+   local listener = cc.EventListenerTouchOneByOne:create()
+   local function onTouchBegan(touch, event)
+      local target = event:getCurrentTarget()
+      local pos = target:convertToNodeSpace(touch:getLocation())
+      local size = target:getContentSize()
+      if 0 < pos.x and pos.x < size.width and
+      0 < pos.y and pos.y < size.height then
+         return true
+      end
+      return false
+   end
+   local function onTouchEnded(touch, event)
+      local target = event:getCurrentTarget()
+      local pos = target:convertToNodeSpace(touch:getLocation())
+      local size = target:getContentSize()
+      if 0 < pos.x and pos.x < size.width and
+      0 < pos.y and pos.y < size.height then
+         handler()
+      end
+   end
+   listener:registerScriptHandler(onTouchBegan, cc.Hanler.EVENT_TOUCH_BEGAN)
+   listener:registerScriptHandler(onTouchEnded, cc.Handler.EVENT_TOUCH_ENDED)
+   local eventDispatcher = cc.Director:getInstance():getEventDispatcher()
+   eventDispatcher:addEventListenerWithSceneGraphPriority(listener, node)
+end

@@ -131,7 +131,7 @@ function DebugPanel.getItemText(item)
    return string.format('> %s\n%s', item.cmd, item.cmd_result)
 end
 
-utils = utils or {}
+
 utils.DebugPanel = DebugPanel
 function utils.showDebugPanelSwitcher(scene)
    scene = scene or cc.Director:getInstance():getRunningScene()
@@ -139,11 +139,44 @@ function utils.showDebugPanelSwitcher(scene)
    --clippingNode:setContentSize(cc.size(100, 100))
    local drawNode = cc.DrawNode:create()
    drawNode:setContentSize(cc.size(100, 100))
-   drawNode:drawSolidCircle(cc.p(50, 50), 40, math.pi*2, 60, 1, 1, cc.c4f(0,0,0,255))
+   drawNode:drawSolidCircle(cc.p(50, 50), 40, math.pi*2, 60, 1, 1, cc.c4f(0,0.5,0.5,1))
    drawNode:setPosition(100,100)
    scene:addChild(drawNode)
    local listener = cc.EventListenerTouchOneByOne:create()
-   listener:registerScriptHandler(function()print('touch began')end, cc.Handler.EVENT_TOUCH_BEGAN)
+   local function onTouchBegan(touch, event)
+      if utils.touchEventInNodeContent(touch, event) then
+         event:getCurrentTarget():stopAllActions()
+         return true
+      end
+      return false
+   end
+   local function onTouchMove(touch, event)
+      local target = event:getCurrentTarget()
+      local pos = target:convertToNodeSpace(touch:getLocation())
+      target:setPosition(pos)
+   end
+   local function onTouchEnded(touch, event)
+      if touch:getDelta() < 10 then
+         local tag = 999
+         local panel = scene:getChildByTag(tag)
+         print('----',panel)
+         if not panel then
+            panel = DebugPanel.create()
+            panel:setTag(tag)
+            scene:addChild(panel)
+         else
+            panel:setVisible(not panel:isVisible())
+         end
+      else
+         local target = event:getCurrentTarget()
+         local pos = touch:getLocation()
+         local x = pos.x > display.cx and display.width or 0
+         local move = cc.MoveTo:create(0.3, cc.p(x, pos.y))
+         target:runAction(move)
+      end
+   end
+   listener:registerScriptHandler(onTouchBegan, cc.Handler.EVENT_TOUCH_BEGAN)
+   listener:registerScriptHandler(onTouchEnded, cc.Handler.EVENT_TOUCH_ENDED)
    local eventDispatcher = cc.Director:getInstance():getEventDispatcher()
    eventDispatcher:addEventListenerWithSceneGraphPriority(listener, drawNode)
 end
